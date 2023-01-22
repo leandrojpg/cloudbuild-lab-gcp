@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab-deployment
+spec:
+  selector:
+    matchLabels:
+      app: lab
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: lab
+    spec:
+      containers:
+      - name: gke-image
+        image: TEST_IMAGE_NAME
+#        image: gcr.io/batman01-001/gke-image:${_VERSION}
+#        image: gcr.io/batman01-001/gke-image:v3.0
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lab-deployment
+spec:
+  type: LoadBalancer
+  selector:
+    app: lab
+  ports:
+    - protocol: TCP
+      port: 80         # Porta do LB
+      targetPort: 8080
+

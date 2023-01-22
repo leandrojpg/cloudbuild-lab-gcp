@@ -1,0 +1,14 @@
+steps:
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/batman-001-374222/runimage', '.']
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/batman-001-374222/runimage']
+# Deploy container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['run', 'deploy', 'runwithcicd', '--image', 'gcr.io/batman-001-374222/runimage', '--region', 'us-east4', '--allow-unauthenticated']
+images:
+- gcr.io/batman-001-374222/runimage
+

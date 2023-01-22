@@ -1,0 +1,30 @@
+##steps:
+- name: 'gcr.io/cloud-builders/git'
+  args: ['clone', 'https://source.developers.google.com/p/${_PROJECT_ID}/r/repo-07']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build','-t',  'gcr.io/${_PROJECT_ID}/${_CINAME}:$SHORT_SHA', '.']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push','gcr.io/${_PROJECT_ID}/${_CINAME}:$SHORT_SHA']
+
+# kubectl set image deployment/cicd-app-1 runimage-sha256-1=gcr.io/${_PROJECT_ID}/${_CINAME}:${_VERSION}
+#kubectl run lab-devops --image=gcr.io/batman01-001/gke-image:v3.0
+- name: 'gcr.io/cloud-builders/kubectl'
+  id: step1
+  args: ['create','deployment','lab-devops','--image=gcr.io/${_PROJECT_ID}/${_CINAME}:$SHORT_SHA']
+  env : 
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-lab'
+
+- name: 'gcr.io/cloud-builders/kubectl'
+  args: ['expose','deployment','lab-devops','--port=80','--target-port=8080','--type=LoadBalancer']
+  waitFor: ['step1']
+  env :
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-lab'
+
+substitutions:
+  _PROJECT_ID : batman01-001
+  _CINAME : gke-image
+  _VERSION : v3.0

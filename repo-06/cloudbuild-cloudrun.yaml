@@ -1,0 +1,17 @@
+####################################################################################################
+#IMPORTANTE NAO ESQUECE DE TROCAR O NOME DO  PROJETO PARA QUE A IMAGEM POSSA SER CRIADA E LOCALIZADA        #
+####################################################################################################
+steps:
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/batman01-123/runimage', '.']
+# Push the container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/batman01-123/runimage']
+# Deploy container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['run', 'deploy', 'runwithcicd', '--image', 'gcr.io/batman01-123/runimage', '--region', 'us-east4', '--allow-unauthenticated']
+images:
+- gcr.io/batman01-123/runimage
+

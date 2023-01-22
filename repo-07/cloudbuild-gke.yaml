@@ -1,0 +1,27 @@
+steps:
+- name: 'gcr.io/cloud-builders/git'
+  args: ['clone', 'https://source.developers.google.com/p/${_PROJECT_ID}/r/repo-07']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build','-t',  '${_GCR_HOSTNAME}/${_PROJECT_ID}/${_CINAME}:$SHORT_SHA', '.']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push','${_GCR_HOSTNAME}/${_PROJECT_ID}/${_CINAME}:$SHORT_SHA']
+  
+- name: 'ubuntu'
+  args: ['bash','-c','sed -i "s,TEST_IMAGE_NAME,${_GCR_HOSTNAME}/${_PROJECT_ID}/${_CINAME}:$SHORT_SHA," deployment.yaml']
+   
+- name: 'gcr.io/cloud-builders/kubectl'
+  args: ['apply', '-f', 'deployment.yaml']
+  env :
+  - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=cluster-lab'  
+
+ 
+substitutions:
+  _GCR_HOSTNAME: gcr.io
+  _PROJECT_ID : batman01-001
+  _CINAME : gke-image
+#  _VERSION : v4.0  
+  
+
